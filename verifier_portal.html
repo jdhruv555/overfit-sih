@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifier Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="nav">
+            <a class="brand" href="index.html">
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="g5" x1="0" x2="1"><stop stop-color="#06b6d4" offset="0"/><stop stop-color="#7c3aed" offset="1"/></linearGradient></defs><rect width="48" height="48" rx="10" fill="url(#g5)"/><path d="M24 12l7 8h-4v10h-6V20h-4l7-8z" fill="rgba(255,255,255,0.95)"/></svg>
+                <span class="title">Digital Certificate System</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="issuer_dashboard.html">Issue certificates</a>
+                <a href="verifier_portal.html">Verify certificates</a>
+                <a href="learner_dashboard.html">My Certificates</a>
+            </div>
+            <div class="cta">
+                <a href="login.html" class="btn btn-secondary">Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="verifier-main">
+        <div class="verifier-header">
+            <h2>Certificate Verification Portal</h2>
+            <p class="verifier-subtitle">Instantly verify the authenticity of digital certificates</p>
+        </div>
+
+        <div class="verifier-grid">
+            <div class="verifier-card verification-container">
+                <div class="card-header">
+                    <h3>Verify a Certificate</h3>
+                    <p class="text-muted">Enter certificate details or scan QR code</p>
+                </div>
+
+                <div class="verification-methods">
+                    <div class="method-tab active" data-method="id">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h10"/></svg>
+                        Certificate ID
+                    </div>
+                    <div class="method-tab" data-method="qr">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><rect x="10" y="10" width="4" height="4"/></svg>
+                        QR Code
+                    </div>
+                </div>
+
+                <div class="verification-content" id="id-verification">
+                    <form class="verification-form">
+                        <div class="form-group">
+                            <label for="certificateId">Certificate ID or Learner ID</label>
+                            <div class="input-group">
+                                <input type="text" id="certificateId" name="certificateId" 
+                                    placeholder="Enter certificate ID or learner ID" required>
+                                <button type="button" class="btn-icon" title="Scan from image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v4"/><path d="M9 21H5a2 2 0 0 1-2-2v-4"/><path d="M21 9v6"/><path d="M3 9v6"/><rect x="7" y="7" width="10" height="10" rx="2.5"/></svg>
+                                </button>
+                            </div>
+                            <small class="help-text">Enter the unique identifier provided on the certificate</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary verify-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                            Verify Certificate
+                        </button>
+                    </form>
+                </div>
+
+                <div class="verification-content hidden" id="qr-verification">
+                    <div class="qr-scanner-container">
+                        <div class="scanner-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><rect x="10" y="10" width="4" height="4"/></svg>
+                            <p>Position the QR code within the frame</p>
+                            <button class="btn btn-secondary upload-qr">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Upload QR Code
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="verifier-card verification-result">
+                <div class="card-header">
+                    <h3>Verification Result</h3>
+                    <p class="text-muted">Certificate authenticity check results</p>
+                </div>
+
+                <div class="result-container">
+                    <div class="result-valid">
+                        <div class="result-header">
+                            <div class="result-status">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <span>Valid Certificate</span>
+                            </div>
+                            <div class="result-actions">
+                                <button class="btn-icon" title="Download Certificate">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                </button>
+                                <button class="btn-icon" title="Share">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="certificate-details">
+                            <div class="detail-group">
+                                <label>Certificate ID</label>
+                                <div class="detail-value">
+                                    <span class="certificate-id">CERT12345</span>
+                                    <button class="copy-btn" data-copy="CERT12345">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="detail-group">
+                                <label>Learner Name</label>
+                                <div class="detail-value">John Doe</div>
+                            </div>
+                            <div class="detail-group">
+                                <label>Course</label>
+                                <div class="detail-value">NCVET Diploma in Engineering</div>
+                            </div>
+                            <div class="detail-group">
+                                <label>Issuer</label>
+                                <div class="detail-value">Ministry of Skill Development</div>
+                            </div>
+                            <div class="detail-group">
+                                <label>Blockchain Hash</label>
+                                <div class="detail-value hash-container">
+                                    <code>0xabc...def</code>
+                                    <button class="copy-btn" data-copy="0xabc...def">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="blockchain-verification">
+                            <div class="verification-stamp">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                                Blockchain Verified
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-invalid hidden">
+                        <div class="result-header error">
+                            <div class="result-status">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                <span>Invalid Certificate</span>
+                            </div>
+                        </div>
+                        <div class="error-message">
+                            <p>This certificate could not be verified. It may be invalid, revoked, or tampered with.</p>
+                            <button class="btn btn-secondary">Report Issue</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Digital Certificate System</p>
+    </footer>
+    <script src="main.js" defer></script>
+</body>
+</html>
