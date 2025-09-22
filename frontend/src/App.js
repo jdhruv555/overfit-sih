@@ -24,6 +24,9 @@ const formatDetail = (detail) => {
   return String(detail);
 };
 
+// Basic email format validation (user@example.com)
+const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
 // A single reusable input component
 const Input = ({ id, label, type = 'text', value, onChange, placeholder }) => (
   <div>
@@ -76,6 +79,12 @@ const RegisterForm = ({ onSwitch }) => {
     setMessage('');
 
     try {
+      if (!isValidEmail(email)) {
+        throw new Error('Please enter a valid email like user@example.com');
+      }
+      if (password.length < 4) {
+        throw new Error('Password should be at least 4 characters');
+      }
       // NOTE: In a Docker setup, the browser needs to call the backend service name.
       // But for local development before everything is dockerized, we use localhost.
       // The '/api/v1' prefix is based on your backend router setup.
@@ -187,6 +196,12 @@ const LoginForm = ({ onSwitch }) => {
     formData.append('password', password);
 
     try {
+      if (!isValidEmail(username)) {
+        throw new Error('Please enter a valid email like user@example.com');
+      }
+      if (password.length < 4) {
+        throw new Error('Password should be at least 4 characters');
+      }
       const response = await fetch(`${API_BASE}/api/v1/login/token`, {
         method: 'POST',
         headers: {
