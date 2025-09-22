@@ -25,6 +25,6 @@ class Evidence(Base):
     filename: Mapped[str] = mapped_column(String(256))
     sha256: Mapped[str] = mapped_column(String(64))
     storage_path: Mapped[str] = mapped_column(String(512))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.timezone.utc)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     incident = relationship("Incident", backref="evidences")
