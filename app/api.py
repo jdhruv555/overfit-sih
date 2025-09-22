@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import HTTPException
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
@@ -22,17 +24,30 @@ def db_check(db: Session = Depends(get_db)) -> dict:
     return {"db": "ok"}
 
 
-@router.post("/incidents")
-def create_incident(db: Session = Depends(get_db)) -> dict:
-    incident = Incident(
-        reporter_id="demo",
-        evidence_type="url",
-        risk_label="Safe",
-    )
-    db.add(incident)
-    db.commit()
-    db.refresh(incident)
-    return {"id": incident.id}
+# User registration and login stubs to match frontend
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    full_name: str
+
+
+@router.post("/users/")
+def create_user(user: UserCreate) -> dict:
+    # Stub: In a real app, insert into users table and hash password
+    if not user.password:
+        raise HTTPException(status_code=400, detail="Password required")
+    return {"id": 1, "email": user.email, "full_name": user.full_name}
+
+
+from fastapi.security import OAuth2PasswordRequestForm
+
+
+@router.post("/login/token")
+def login_token(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
+    # Stub: In a real app, verify user credentials and return signed JWT
+    if not form_data.username or not form_data.password:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    return {"access_token": "demo-token", "token_type": "bearer"}
 
 @router.post("/incidents")
 def create_incident(
