@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+const API_BASE = (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '3000') ? 'http://localhost:8000' : '';
 
 // A single reusable input component
 const Input = ({ id, label, type = 'text', value, onChange, placeholder }) => (
@@ -42,6 +43,9 @@ const RegisterForm = ({ onSwitch }) => {
   const [fullName, setFullName] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,7 +56,7 @@ const RegisterForm = ({ onSwitch }) => {
       // NOTE: In a Docker setup, the browser needs to call the backend service name.
       // But for local development before everything is dockerized, we use localhost.
       // The '/api/v1' prefix is based on your backend router setup.
-      const response = await fetch('/api/v1/users/', {
+      const response = await fetch(`${API_BASE}/api/v1/users/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,22 +68,64 @@ const RegisterForm = ({ onSwitch }) => {
         }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but received: ${text.slice(0,300)}`);
+      }
 
       if (!response.ok) {
         // Handle validation errors or other issues
         throw new Error(data.detail || 'Failed to register.');
       }
 
-      setMessage('Registration successful! Please log in.');
-      // Clear form
-      setEmail('');
-      setPassword('');
-      setFullName('');
-      setTimeout(() => onSwitch(), 2000); // Switch to login form after 2 seconds
+  
+      setMessage('Registration created. Enter the OTP sent to your email (demo).');
+      setRegisteredEmail(data.email || email);
+      if (data.otp) {
+        // show the OTP to the user in demo mode
+        setMessage((prev) => `${prev} Demo OTP: ${data.otp}`);
+      }
+      setShowOtp(true);
 
     } catch (error) {
       setMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/users/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail, otp }),
+      });
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but received: ${text.slice(0,300)}`);
+      }
+      if (!response.ok) throw new Error(data.detail || 'OTP verification failed');
+
+      setMessage('Verification successful! You can now log in.');
+      setEmail('');
+      setPassword('');
+      setFullName('');
+      setOtp('');
+      setShowOtp(false);
+      setTimeout(() => onSwitch(), 1500);
+    } catch (err) {
+      setMessage(err.message || String(err));
     } finally {
       setLoading(false);
     }
@@ -96,11 +142,14 @@ const RegisterForm = ({ onSwitch }) => {
           </button>
         </p>
       </div>
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-6" onSubmit={showOtp ? handleVerifyOtp : handleSubmit}>
         <Input id="fullName" label="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" />
         <Input id="email" label="Email address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         <Input id="password" label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-        <Button disabled={loading}>{loading ? 'Registering...' : 'Create Account'}</Button>
+        {showOtp ? (
+          <Input id="otp" label="OTP" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="123456" />
+        ) : null}
+        <Button disabled={loading}>{loading ? (showOtp ? 'Verifying...' : 'Registering...') : (showOtp ? 'Verify OTP' : 'Create Account')}</Button>
       </form>
       {message && <p className={`mt-4 text-sm text-center ${message.includes('successful') ? 'text-green-400' : 'text-red-400'}`}>{message}</p>}
     </div>
@@ -126,7 +175,7 @@ const LoginForm = ({ onSwitch }) => {
     formData.append('password', password);
 
     try {
-      const response = await fetch('/api/v1/login/token', {
+      const response = await fetch(`${API_BASE}/api/v1/login/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -134,7 +183,13 @@ const LoginForm = ({ onSwitch }) => {
         body: formData,
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but received: ${text.slice(0,300)}`);
+      }
 
       if (!response.ok) {
         throw new Error(data.detail || 'Failed to log in.');
