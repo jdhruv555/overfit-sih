@@ -19,15 +19,44 @@ services:
     build: .
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/appdb
-    ports:
-      - "8000:8000"
+    # The port is no longer exposed directly. Nginx will handle traffic.
+    # ports:
+    #   - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - ./:/app
 
+  # NEW: Frontend Service for the React App
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+      - ./frontend/src:/app/src # Mounts your source for live-reloading
+    environment:
+      # This helps with live reloading on Windows
+      - WATCHPACK_POLLING=true
+      - HOST=0.0.0.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  # NEW: Web Server (Nginx) - This is the new entry point for your app
+  nginx:
+    image: nginx:1.21.3-alpine
+    restart: unless-stopped
+    ports:
+      # Expose port 80. You will now access everything through http://localhost
+      - "80:80" 
+    volumes:
+      # This links to the Nginx configuration file you need to create
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+
 volumes:
   db_data:
-
 
