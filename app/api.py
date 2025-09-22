@@ -106,6 +106,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
 @router.on_event("startup")
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
+    # Lightweight migration to add OTP columns if they don't exist
+    from sqlalchemy import text as _text
+    with engine.begin() as conn:
+        conn.execute(_text("ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_code VARCHAR(16)"))
+        conn.execute(_text("ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_expires_at TIMESTAMP"))
+        conn.execute(_text("ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP"))
 
 
 @router.get("/db-check")
@@ -114,18 +120,7 @@ def db_check(db: Session = Depends(get_db)) -> dict:
     return {"db": "ok"}
 
 
-@router.post("/incidents")
-def create_incident(db: Session = Depends(get_db)) -> dict:
-    incident = Incident(
-        reporter_id="demo",
-        evidence_type="url",
-        risk_label="Safe",
-    )
-    db.add(incident)
-    db.commit()
-    db.refresh(incident)
-    return {"id": incident.id}
-
+# Upload evidence and create incident
 @router.post("/incidents")
 def create_incident(
     reporter_id: str = Form(...),

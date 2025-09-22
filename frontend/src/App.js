@@ -1,5 +1,28 @@
 import React, { useState } from 'react';
-const API_BASE = (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '3000') ? 'http://localhost:8000' : '';
+// Prefer same-origin API calls so it works behind nginx (http://localhost)
+// Allow override for pure local dev with backend on another origin
+const API_BASE = process.env.REACT_APP_API_BASE || '';
+
+// Helper to convert FastAPI error payloads into readable text
+const formatDetail = (detail) => {
+  if (!detail) return 'Request failed';
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((d) => {
+        if (typeof d === 'string') return d;
+        const location = Array.isArray(d.loc) ? d.loc.join('.') : d.loc;
+        const message = d.msg || d.message || JSON.stringify(d);
+        return location ? `${location}: ${message}` : message;
+      })
+      .join('\n');
+  }
+  if (typeof detail === 'object') {
+    if (detail.msg) return detail.msg;
+    return JSON.stringify(detail);
+  }
+  return String(detail);
+};
 
 // A single reusable input component
 const Input = ({ id, label, type = 'text', value, onChange, placeholder }) => (
@@ -68,17 +91,11 @@ const RegisterForm = ({ onSwitch }) => {
         }),
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (err) {
-        const text = await response.text();
-        throw new Error(`Expected JSON but received: ${text.slice(0,300)}`);
-      }
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json() : { raw: await response.text() };
 
       if (!response.ok) {
-        // Handle validation errors or other issues
-        throw new Error(data.detail || 'Failed to register.');
+        throw new Error(formatDetail(data.detail) || 'Failed to register.');
       }
 
   
@@ -108,14 +125,9 @@ const RegisterForm = ({ onSwitch }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: registeredEmail, otp }),
       });
-      let data;
-      try {
-        data = await response.json();
-      } catch (err) {
-        const text = await response.text();
-        throw new Error(`Expected JSON but received: ${text.slice(0,300)}`);
-      }
-      if (!response.ok) throw new Error(data.detail || 'OTP verification failed');
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json() : { raw: await response.text() };
+      if (!response.ok) throw new Error(formatDetail(data.detail) || 'OTP verification failed');
 
       setMessage('Verification successful! You can now log in.');
       setEmail('');
@@ -183,16 +195,11 @@ const LoginForm = ({ onSwitch }) => {
         body: formData,
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (err) {
-        const text = await response.text();
-        throw new Error(`Expected JSON but received: ${text.slice(0,300)}`);
-      }
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json() : { raw: await response.text() };
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Failed to log in.');
+        throw new Error(formatDetail(data.detail) || 'Failed to log in.');
       }
       
       // In a real app, you'd save this token (e.g., in localStorage)
