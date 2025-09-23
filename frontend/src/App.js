@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MainDashboard from './components/MainDashboard';
+import CyberIncidentPortal from './components/CyberIncidentPortal';
+import SafetyWebPortal from './components/SafetyWebPortal';
+import CertDashboard from './components/CertDashboard';
 // Prefer same-origin API calls so it works behind nginx (http://localhost)
 // Allow override for pure local dev with backend on another origin
 const API_BASE = process.env.REACT_APP_API_BASE || '';
@@ -217,9 +222,12 @@ const LoginForm = ({ onSwitch }) => {
         throw new Error(formatDetail(data.detail) || 'Failed to log in.');
       }
       
-      // In a real app, you'd save this token (e.g., in localStorage)
-      console.log('Access Token:', data.access_token);
-      setMessage(`Login successful! Token received.`);
+      // Save token and redirect to dashboard
+      localStorage.setItem('access_token', data.access_token);
+      setMessage(`Login successful! Redirecting to dashboard...`);
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1500);
 
     } catch (error) {
       setMessage(error.message);
@@ -250,7 +258,13 @@ const LoginForm = ({ onSwitch }) => {
 };
 
 
-// The main App component that switches between Login and Register
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('access_token');
+  return token ? children : <Navigate to="/" replace />;
+};
+
+// The main App component with routing
 export default function App() {
   const [isLogin, setIsLogin] = useState(true);
 
@@ -259,8 +273,55 @@ export default function App() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 font-sans">
-      {isLogin ? <LoginForm onSwitch={toggleForm} /> : <RegisterForm onSwitch={toggleForm} />}
-    </div>
+    <Router>
+      <Routes>
+        {/* Login/Register Route */}
+        <Route 
+          path="/" 
+          element={
+            <div className="flex items-center justify-center min-h-screen bg-gray-900 font-sans">
+              {isLogin ? <LoginForm onSwitch={toggleForm} /> : <RegisterForm onSwitch={toggleForm} />}
+            </div>
+          } 
+        />
+        
+        {/* Protected Dashboard Routes */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <MainDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/cyber-incident" 
+          element={
+            <ProtectedRoute>
+              <CyberIncidentPortal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/safety-web" 
+          element={
+            <ProtectedRoute>
+              <SafetyWebPortal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/cert-dashboard" 
+          element={
+            <ProtectedRoute>
+              <CertDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }
