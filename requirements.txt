@@ -9,3 +9,4 @@ transformers
 torch
 email-validator==2.2.0
 passlib[bcrypt]==1.7.4
+kagglehub[pandas-datasets]
