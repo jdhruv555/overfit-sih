@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Prefer same-origin API calls behind nginx
+const API_BASE = process.env.REACT_APP_API_BASE || '';
+
 const CyberIncidentPortal = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -39,27 +42,55 @@ const CyberIncidentPortal = () => {
     setMessage('');
 
     try {
-      // Simulate API call - replace with actual backend integration
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock result for demo
-      const mockResult = {
-        classification: 'High Priority Cyber Attack',
-        priorityScore: 8.5,
+      if (!formData.evidence) {
+        throw new Error('Please attach an evidence file.');
+      }
+
+      // 1) Upload evidence and create incident (backend stores encrypted file)
+      const fd = new FormData();
+      fd.append('reporter_id', 'portal-user');
+      fd.append('evidence_type', 'cyber');
+      fd.append('file', formData.evidence);
+
+      const createResp = await fetch(`${API_BASE}/api/v1/incidents`, {
+        method: 'POST',
+        body: fd,
+      });
+      const createJson = await createResp.json();
+      if (!createResp.ok) {
+        throw new Error(createJson?.detail || 'Failed to create incident');
+      }
+
+      const incidentId = createJson.incident_id;
+
+      // 2) Mark as Red to trigger CERT webhook automatically
+      const riskResp = await fetch(`${API_BASE}/api/v1/incidents/${incidentId}/risk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ risk_label: 'Red' }),
+      });
+      const riskJson = await riskResp.json();
+      if (!riskResp.ok || !riskJson.webhook_sent) {
+        throw new Error(riskJson?.detail || 'Incident created, but webhook failed to send');
+      }
+
+      // 3) Show results
+      const done = {
+        classification: 'Critical (Red) Cyber Incident',
+        priorityScore: 9.0,
         nextSteps: [
-          'Immediately disconnect affected systems from the network',
+          'Disconnect affected systems from the network',
           'Preserve all evidence and logs',
           'Contact your IT security team',
-          'File a police report if financial loss occurred',
-          'Monitor for additional suspicious activity'
+          'Monitor for additional suspicious activity',
         ],
-        alertSent: true
+        alertSent: true,
+        incidentId,
       };
-      
-      setResult(mockResult);
-      setMessage('Incident reported successfully! CERT has been alerted.');
+      setResult(done);
+      setMessage(`Incident #${incidentId} reported. CERT alert sent.`);
     } catch (error) {
-      setMessage('Error submitting incident report. Please try again.');
+      setMessage(error.message || 'Error submitting incident report. Please try again.');
     } finally {
       setLoading(false);
     }

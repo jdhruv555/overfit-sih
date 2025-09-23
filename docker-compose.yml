@@ -40,6 +40,7 @@ services:
       # This helps with live reloading on Windows
       - WATCHPACK_POLLING=true
       - HOST=0.0.0.0
+      - REACT_APP_API_BASE=http://localhost
     ports:
       - "3000:3000"
     depends_on:
