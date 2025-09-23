@@ -5,3 +5,5 @@ psycopg[binary]==3.2.1
 python-dotenv==1.0.1
 cryptography==46.0.1
 python-multipart
+transformers
+torch
