@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Logs
+*.log
+frontend/*.log
+
+# Local encrypted files
+secure_storage/
+secret.key
+
+# Node
+frontend/node_modules/
+frontend/package-lock.json
+
+# Mac
+.DS_Store
+
+

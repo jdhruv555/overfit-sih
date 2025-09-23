@@ -13,6 +13,10 @@ from . import storage
 
 from passlib.context import CryptContext
 
+import os
+from fastapi import Request
+from .webhooks import post_cert_webhook, verify_signature, get_cert_webhook_config
+
 
 router = APIRouter()
 
@@ -164,3 +168,68 @@ def create_incident(
         "evidence_id": evidence.id,
         "sha256": sha256,
     }
+
+
+# --- CERT Webhook integration ---
+
+class RiskUpdate(BaseModel):
+    risk_label: str
+
+
+@router.post("/incidents/{incident_id}/risk")
+async def update_incident_risk(incident_id: int, payload: RiskUpdate, db: Session = Depends(get_db)) -> dict:
+    incident = db.query(Incident).filter(Incident.id == incident_id).first()
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+
+    prior = incident.risk_label
+    incident.risk_label = payload.risk_label
+    db.add(incident)
+    db.commit()
+    db.refresh(incident)
+
+    pushed = False
+    status = None
+    if payload.risk_label.lower() == "red":
+        # Fetch latest evidence for additional context
+        latest_evidence = (
+            db.query(Evidence)
+            .filter(Evidence.incident_id == incident.id)
+            .order_by(Evidence.created_at.desc())
+            .first()
+        )
+
+        cert_payload = {
+            "incident_id": incident.id,
+            "reporter_id": incident.reporter_id,
+            "evidence_type": incident.evidence_type,
+            "risk_label": incident.risk_label,
+            "updated_at": datetime.utcnow().isoformat() + "Z",
+            "evidence_sha256": getattr(latest_evidence, "sha256", None),
+            "evidence_filename": getattr(latest_evidence, "filename", None),
+        }
+        status, _text = await post_cert_webhook(cert_payload)
+        pushed = 200 <= status < 300
+
+    return {"id": incident.id, "previous": prior, "current": incident.risk_label, "webhook_sent": pushed, "webhook_status": status}
+
+
+class CertAck(BaseModel):
+    received: bool
+    incident_id: int | None = None
+
+
+@router.post("/cert/ingest")
+async def cert_ingest(request: Request) -> CertAck:
+    raw = await request.body()
+    sig = request.headers.get("X-CERT-Signature", "")
+    _url, secret = get_cert_webhook_config()
+    if not verify_signature(sig, raw, secret):
+        raise HTTPException(status_code=401, detail="invalid signature")
+
+    try:
+        data = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="invalid json")
+
+    return CertAck(received=True, incident_id=int(data.get("incident_id")) if data.get("incident_id") is not None else None)

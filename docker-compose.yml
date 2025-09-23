@@ -19,6 +19,8 @@ services:
     build: .
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/appdb
+      CERT_WEBHOOK_URL: ${CERT_WEBHOOK_URL:-http://nginx/api/v1/cert/ingest}
+      CERT_WEBHOOK_SECRET: ${CERT_WEBHOOK_SECRET:-dev_cert_secret}
     # The port is no longer exposed directly. Nginx will handle traffic.
     # ports:
     #   - "8000:8000"
