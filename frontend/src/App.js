@@ -1,4 +1,36 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MainDashboard from './components/MainDashboard';
+import CyberIncidentPortal from './components/CyberIncidentPortal';
+import SafetyWebPortal from './components/SafetyWebPortal';
+import CertDashboard from './components/CertDashboard';
+// Prefer same-origin API calls so it works behind nginx (http://localhost)
+// Allow override for pure local dev with backend on another origin
+const API_BASE = process.env.REACT_APP_API_BASE || '';
+
+// Helper to convert FastAPI error payloads into readable text
+const formatDetail = (detail) => {
+  if (!detail) return 'Request failed';
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((d) => {
+        if (typeof d === 'string') return d;
+        const location = Array.isArray(d.loc) ? d.loc.join('.') : d.loc;
+        const message = d.msg || d.message || JSON.stringify(d);
+        return location ? `${location}: ${message}` : message;
+      })
+      .join('\n');
+  }
+  if (typeof detail === 'object') {
+    if (detail.msg) return detail.msg;
+    return JSON.stringify(detail);
+  }
+  return String(detail);
+};
+
+// Basic email format validation (user@example.com)
+const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 // A single reusable input component
 const Input = ({ id, label, type = 'text', value, onChange, placeholder }) => (
@@ -42,6 +74,9 @@ const RegisterForm = ({ onSwitch }) => {
   const [fullName, setFullName] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,10 +84,16 @@ const RegisterForm = ({ onSwitch }) => {
     setMessage('');
 
     try {
+      if (!isValidEmail(email)) {
+        throw new Error('Please enter a valid email like user@example.com');
+      }
+      if (password.length < 4) {
+        throw new Error('Password should be at least 4 characters');
+      }
       // NOTE: In a Docker setup, the browser needs to call the backend service name.
       // But for local development before everything is dockerized, we use localhost.
       // The '/api/v1' prefix is based on your backend router setup.
-      const response = await fetch('/api/v1/users/', {
+      const response = await fetch(`${API_BASE}/api/v1/users/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,22 +105,53 @@ const RegisterForm = ({ onSwitch }) => {
         }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json() : { raw: await response.text() };
 
       if (!response.ok) {
-        // Handle validation errors or other issues
-        throw new Error(data.detail || 'Failed to register.');
+        throw new Error(formatDetail(data.detail) || 'Failed to register.');
       }
 
-      setMessage('Registration successful! Please log in.');
-      // Clear form
-      setEmail('');
-      setPassword('');
-      setFullName('');
-      setTimeout(() => onSwitch(), 2000); // Switch to login form after 2 seconds
+  
+      setMessage('Registration created. Enter the OTP sent to your email (demo).');
+      setRegisteredEmail(data.email || email);
+      if (data.otp) {
+        // show the OTP to the user in demo mode
+        setMessage((prev) => `${prev} Demo OTP: ${data.otp}`);
+      }
+      setShowOtp(true);
 
     } catch (error) {
       setMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/users/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail, otp }),
+      });
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json() : { raw: await response.text() };
+      if (!response.ok) throw new Error(formatDetail(data.detail) || 'OTP verification failed');
+
+      setMessage('Verification successful! You can now log in.');
+      setEmail('');
+      setPassword('');
+      setFullName('');
+      setOtp('');
+      setShowOtp(false);
+      setTimeout(() => onSwitch(), 1500);
+    } catch (err) {
+      setMessage(err.message || String(err));
     } finally {
       setLoading(false);
     }
@@ -96,11 +168,14 @@ const RegisterForm = ({ onSwitch }) => {
           </button>
         </p>
       </div>
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-6" onSubmit={showOtp ? handleVerifyOtp : handleSubmit}>
         <Input id="fullName" label="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" />
         <Input id="email" label="Email address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         <Input id="password" label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-        <Button disabled={loading}>{loading ? 'Registering...' : 'Create Account'}</Button>
+        {showOtp ? (
+          <Input id="otp" label="OTP" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="123456" />
+        ) : null}
+        <Button disabled={loading}>{loading ? (showOtp ? 'Verifying...' : 'Registering...') : (showOtp ? 'Verify OTP' : 'Create Account')}</Button>
       </form>
       {message && <p className={`mt-4 text-sm text-center ${message.includes('successful') ? 'text-green-400' : 'text-red-400'}`}>{message}</p>}
     </div>
@@ -126,7 +201,13 @@ const LoginForm = ({ onSwitch }) => {
     formData.append('password', password);
 
     try {
-      const response = await fetch('/api/v1/login/token', {
+      if (!isValidEmail(username)) {
+        throw new Error('Please enter a valid email like user@example.com');
+      }
+      if (password.length < 4) {
+        throw new Error('Password should be at least 4 characters');
+      }
+      const response = await fetch(`${API_BASE}/api/v1/login/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -134,15 +215,19 @@ const LoginForm = ({ onSwitch }) => {
         body: formData,
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json() : { raw: await response.text() };
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Failed to log in.');
+        throw new Error(formatDetail(data.detail) || 'Failed to log in.');
       }
       
-      // In a real app, you'd save this token (e.g., in localStorage)
-      console.log('Access Token:', data.access_token);
-      setMessage(`Login successful! Token received.`);
+      // Save token and redirect to dashboard
+      localStorage.setItem('access_token', data.access_token);
+      setMessage(`Login successful! Redirecting to dashboard...`);
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1500);
 
     } catch (error) {
       setMessage(error.message);
@@ -173,7 +258,13 @@ const LoginForm = ({ onSwitch }) => {
 };
 
 
-// The main App component that switches between Login and Register
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('access_token');
+  return token ? children : <Navigate to="/" replace />;
+};
+
+// The main App component with routing
 export default function App() {
   const [isLogin, setIsLogin] = useState(true);
 
@@ -182,8 +273,55 @@ export default function App() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 font-sans">
-      {isLogin ? <LoginForm onSwitch={toggleForm} /> : <RegisterForm onSwitch={toggleForm} />}
-    </div>
+    <Router>
+      <Routes>
+        {/* Login/Register Route */}
+        <Route 
+          path="/" 
+          element={
+            <div className="flex items-center justify-center min-h-screen bg-gray-900 font-sans">
+              {isLogin ? <LoginForm onSwitch={toggleForm} /> : <RegisterForm onSwitch={toggleForm} />}
+            </div>
+          } 
+        />
+        
+        {/* Protected Dashboard Routes */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <MainDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/cyber-incident" 
+          element={
+            <ProtectedRoute>
+              <CyberIncidentPortal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/safety-web" 
+          element={
+            <ProtectedRoute>
+              <SafetyWebPortal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/cert-dashboard" 
+          element={
+            <ProtectedRoute>
+              <CertDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }

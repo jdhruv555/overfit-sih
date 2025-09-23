@@ -7,3 +7,5 @@ cryptography==46.0.1
 python-multipart
 transformers
 torch
+email-validator==2.2.0
+passlib[bcrypt]==1.7.4
