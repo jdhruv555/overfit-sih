@@ -20,7 +20,7 @@ const CertDashboard = () => {
           id: 'INC-001',
           reporterId: 'user123@example.com',
           evidenceType: 'File Upload',
-          classificationResult: 'High Priority Cyber Attack',
+          classificationResult: 'OPSEC risk',
           priorityScore: 9.2,
           timestamp: '2024-01-15T10:30:00Z',
           status: 'Active',

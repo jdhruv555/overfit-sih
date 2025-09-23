@@ -41,33 +41,40 @@ const MainDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0a0a0a] via-[#0f0f17] to-black">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-[#6c5ce7]/10 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-[#00d2ff]/10 blur-3xl" />
+      </div>
+
       {/* Header */}
-      <header className="bg-gray-800 shadow-lg">
+      <header className="backdrop-blur-md bg-white/5 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-white">Cyber Security Portal</h1>
+            <div className="flex items-center space-x-3">
+              <div className="h-8 w-8 rounded-md bg-gradient-to-br from-[#6c5ce7] to-[#00d2ff]" />
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                <span className="bg-gradient-to-r from-white via-white to-gray-300 bg-clip-text text-transparent">Cyber Security Portal</span>
+              </h1>
             </div>
             <button
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              className="group inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/90 transition hover:border-white/20 hover:bg-white/10"
             >
-              Logout
+              <span className="h-2 w-2 rounded-full bg-rose-400 group-hover:bg-rose-300" /> Logout
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-extrabold text-white mb-4">
-            Welcome to the Security Portal
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-4">
+            <span className="bg-gradient-to-r from-white via-white to-gray-300 bg-clip-text text-transparent">See Beyond the Surface</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Choose from the available security services below. Each portal is designed to help you 
-            report incidents, check for threats, or monitor security status.
+          <p className="text-lg md:text-xl text-white/70 max-w-3xl mx-auto">
+            Choose a portal to report incidents, analyze threats, or monitor intelligence.
           </p>
         </div>
 
@@ -76,18 +83,20 @@ const MainDashboard = () => {
           {portalCards.map((portal) => (
             <div
               key={portal.id}
-              className={`bg-gradient-to-br ${portal.color} ${portal.hoverColor} rounded-xl shadow-2xl transform transition-all duration-300 hover:scale-105 cursor-pointer`}
+              className={`group relative cursor-pointer rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/10`}
               onClick={() => navigate(portal.route)}
             >
-              <div className="p-8 text-white">
-                <div className="text-6xl mb-6 text-center">{portal.icon}</div>
-                <h3 className="text-2xl font-bold mb-4 text-center">{portal.title}</h3>
-                <p className="text-gray-100 text-center leading-relaxed">
+              <div className="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ background: 'radial-gradient(800px circle at 0% 0%, rgba(108,92,231,0.12), transparent 40%), radial-gradient(800px circle at 100% 100%, rgba(0,210,255,0.12), transparent 40%)' }} />
+              <div className="relative p-8 text-white">
+                <div className="text-6xl mb-6 text-center drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">{portal.icon}</div>
+                <h3 className="text-2xl font-bold mb-3 text-center tracking-tight">{portal.title}</h3>
+                <p className="text-white/80 text-center leading-relaxed">
                   {portal.description}
                 </p>
                 <div className="mt-6 text-center">
-                  <span className="inline-block bg-white bg-opacity-20 px-4 py-2 rounded-full text-sm font-medium">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/90 transition group-hover:border-white/20 group-hover:bg-white/10">
                     Click to Access
+                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M12.293 3.293a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L14 6.414V17a1 1 0 11-2 0V6.414L7.707 8.707A1 1 0 116.293 7.293l4-4z"/></svg>
                   </span>
                 </div>
               </div>
@@ -96,23 +105,23 @@ const MainDashboard = () => {
         </div>
 
         {/* Additional Info */}
-        <div className="mt-16 bg-gray-800 rounded-xl p-8">
-          <h3 className="text-2xl font-bold text-white mb-4 text-center">How It Works</h3>
+        <div className="mt-16 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+          <h3 className="text-2xl font-bold text-white mb-6 text-center">How It Works</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="text-4xl mb-3">📝</div>
               <h4 className="text-lg font-semibold text-white mb-2">Report & Upload</h4>
-              <p className="text-gray-300">Provide detailed information and upload evidence files for analysis.</p>
+              <p className="text-white/70">Provide detailed information and upload evidence files for analysis.</p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-3">🤖</div>
               <h4 className="text-lg font-semibold text-white mb-2">AI Analysis</h4>
-              <p className="text-gray-300">Our AI classifies threats and assigns priority scores automatically.</p>
+              <p className="text-white/70">Our AI classifies threats and assigns priority scores automatically.</p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-3">⚡</div>
               <h4 className="text-lg font-semibold text-white mb-2">Instant Response</h4>
-              <p className="text-gray-300">Get immediate feedback and next steps for your security concerns.</p>
+              <p className="text-white/70">Get immediate feedback and next steps for your security concerns.</p>
             </div>
           </div>
         </div>

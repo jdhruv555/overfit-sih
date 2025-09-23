@@ -81,29 +81,36 @@ const SafetyWebPortal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0a0a0a] via-[#0f0f17] to-black">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-[#6c5ce7]/10 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-[#00d2ff]/10 blur-3xl" />
+      </div>
+
       {/* Header */}
-      <header className="bg-gray-800 shadow-lg">
+      <header className="backdrop-blur-md bg-white/5 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="text-gray-300 hover:text-white mr-4"
+                className="mr-4 inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 transition hover:border-white/20 hover:bg-white/10"
               >
-                ← Back to Dashboard
+                <span aria-hidden>←</span> Back
               </button>
-              <h1 className="text-3xl font-bold text-white">🔍 Safety Web Portal</h1>
+              <h1 className="text-3xl font-bold">
+                <span className="bg-gradient-to-r from-white via-white to-gray-300 bg-clip-text text-transparent">🔍 Safety Web Portal</span>
+              </h1>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-gray-800 rounded-xl shadow-2xl p-8">
+      <main className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-4">Check for Malicious Content</h2>
-            <p className="text-gray-300">
+            <p className="text-white/70">
               Upload files or enter URLs to check if they contain malicious content. 
               Our AI will analyze and provide safety recommendations.
             </p>
@@ -123,17 +130,17 @@ const SafetyWebPortal = () => {
                   value={formData.url}
                   onChange={handleInputChange}
                   placeholder="https://example.com/suspicious-link"
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white"
+                  className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/5 placeholder-white/40 text-white focus:outline-none focus:ring-2 focus:ring-sky-400/50 focus:border-white/20"
                 />
               </div>
 
               {/* OR Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-600" />
+                  <div className="w-full border-t border-white/10" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-gray-800 text-gray-400">OR</span>
+                  <span className="px-2 bg-white/5 text-white/60 rounded">OR</span>
                 </div>
               </div>
 
@@ -142,13 +149,13 @@ const SafetyWebPortal = () => {
                 <label htmlFor="file" className="block text-sm font-medium text-gray-300 mb-2">
                   Upload File to Check (≤10 MB)
                 </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg hover:border-gray-500 transition-colors">
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 rounded-lg border border-dashed border-white/15 hover:border-white/25 bg-white/5 transition-colors">
                   <div className="space-y-1 text-center">
                     <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                       <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    <div className="flex text-sm text-gray-400">
-                      <label htmlFor="file" className="relative cursor-pointer bg-gray-700 rounded-md font-medium text-blue-400 hover:text-blue-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                    <div className="flex text-sm text-white/70">
+                      <label htmlFor="file" className="relative cursor-pointer rounded-md font-medium text-sky-300 hover:text-sky-200">
                         <span>Upload a file</span>
                         <input
                           id="file"
@@ -161,11 +168,11 @@ const SafetyWebPortal = () => {
                       </label>
                       <p className="pl-1">or drag and drop</p>
                     </div>
-                    <p className="text-xs text-gray-500">Any file type up to 10MB</p>
+                    <p className="text-xs text-white/50">Any file type up to 10MB</p>
                   </div>
                 </div>
                 {formData.file && (
-                  <p className="mt-2 text-sm text-green-400">
+                  <p className="mt-2 text-sm text-emerald-300">
                     Selected: {formData.file.name} ({(formData.file.size / 1024 / 1024).toFixed(2)} MB)
                   </p>
                 )}
@@ -183,7 +190,7 @@ const SafetyWebPortal = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Provide any additional context about where you received this content or why you're concerned..."
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white"
+                  className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/5 placeholder-white/40 text-white focus:outline-none focus:ring-2 focus:ring-sky-400/50 focus:border-white/20"
                 />
               </div>
 
@@ -192,7 +199,7 @@ const SafetyWebPortal = () => {
                 <button
                   type="submit"
                   disabled={loading || (!formData.url && !formData.file)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-4 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                  className="w-full rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-600 disabled:from-sky-400 disabled:to-sky-400 text-white font-bold py-4 px-6 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-400/50"
                 >
                   {loading ? 'Analyzing Content...' : 'Check for Threats'}
                 </button>
@@ -201,13 +208,13 @@ const SafetyWebPortal = () => {
           ) : (
             /* Results Display */
             <div className="space-y-6">
-              <div className={`border rounded-lg p-6 ${result.isMalicious ? 'bg-red-900 border-red-700' : 'bg-green-900 border-green-700'}`}>
+              <div className={`rounded-lg p-6 border ${result.isMalicious ? 'border-rose-400/20 bg-rose-400/10' : 'border-emerald-400/20 bg-emerald-400/10'}`}>
                 <div className="flex items-center mb-4">
                   <span className="text-4xl mr-4">
                     {result.isMalicious ? '🚨' : '✅'}
                   </span>
                   <div>
-                    <h3 className={`text-2xl font-bold ${result.isMalicious ? 'text-red-400' : 'text-green-400'}`}>
+                    <h3 className={`text-2xl font-bold ${result.isMalicious ? 'text-rose-300' : 'text-emerald-300'}`}>
                       {result.isMalicious ? 'THREAT DETECTED' : 'SAFE CONTENT'}
                     </h3>
                     <p className="text-gray-300">
@@ -223,7 +230,7 @@ const SafetyWebPortal = () => {
                   </div>
                   <div>
                     <span className="text-gray-300 font-medium">Threat Level: </span>
-                    <span className={`font-bold ${result.threatLevel === 'High' ? 'text-red-400' : 'text-yellow-400'}`}>
+                    <span className={`font-bold ${result.threatLevel === 'High' ? 'text-rose-300' : 'text-yellow-300'}`}>
                       {result.threatLevel}
                     </span>
                   </div>
@@ -240,12 +247,12 @@ const SafetyWebPortal = () => {
                 </div>
               </div>
 
-              <div className="bg-blue-900 border border-blue-700 rounded-lg p-6">
-                <h3 className="text-xl font-bold text-blue-400 mb-4">📋 Recommended Actions</h3>
+              <div className="rounded-lg p-6 border border-sky-400/20 bg-sky-400/10">
+                <h3 className="text-xl font-bold text-sky-300 mb-4">📋 Recommended Actions</h3>
                 <ul className="space-y-2">
                   {result.nextSteps.map((step, index) => (
                     <li key={index} className="flex items-start">
-                      <span className="text-blue-400 mr-3">{index + 1}.</span>
+                      <span className="text-sky-300 mr-3">{index + 1}.</span>
                       <span className="text-gray-300">{step}</span>
                     </li>
                   ))}
@@ -253,8 +260,8 @@ const SafetyWebPortal = () => {
               </div>
 
               {result.isMalicious && (
-                <div className="bg-yellow-900 border border-yellow-700 rounded-lg p-6">
-                  <h3 className="text-xl font-bold text-yellow-400 mb-2">⚠️ CERT Alert</h3>
+                <div className="rounded-lg p-6 border border-amber-400/20 bg-amber-400/10">
+                  <h3 className="text-xl font-bold text-amber-300 mb-2">⚠️ CERT Alert</h3>
                   <p className="text-gray-300">
                     A high-priority alert has been sent to the CERT dashboard due to the malicious nature of this content.
                   </p>
@@ -271,13 +278,13 @@ const SafetyWebPortal = () => {
                       description: ''
                     });
                   }}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-6 py-3 text-white transition hover:border-white/20 hover:bg-white/10"
                 >
                   Check Another Item
                 </button>
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                  className="flex-1 rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-600 text-white font-bold py-3 px-6 transition-colors"
                 >
                   Back to Dashboard
                 </button>
@@ -286,7 +293,7 @@ const SafetyWebPortal = () => {
           )}
 
           {message && (
-            <div className={`mt-6 p-4 rounded-lg ${message.includes('complete') ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
+            <div className={`mt-6 p-4 rounded-lg ${message.includes('complete') ? 'border border-emerald-400/20 bg-emerald-400/10 text-emerald-300' : 'border border-rose-400/20 bg-rose-400/10 text-rose-300'}`}>
               {message}
             </div>
           )}
