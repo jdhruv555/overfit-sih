@@ -26,7 +26,7 @@ const MainDashboard = () => {
     {
       id: 'cert-dashboard',
       title: 'CERT Dashboard',
-      description: 'View all reported incidents with Reporter ID, Evidence Type, Classification Results, and Priority Scores. (Official Access)',
+      description: 'For CERT-Army officals, View all reported incidents with Reporter ID, Evidence Type, Classification Results, and Priority Scores.  (currently accessible to all for the demo)',
       icon: '📊',
       route: '/cert-dashboard',
       color: 'from-green-600 to-green-800',
@@ -47,29 +47,41 @@ const MainDashboard = () => {
         <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-[#00d2ff]/10 blur-3xl" />
       </div>
 
-      {/* Header */}
-      <header className="backdrop-blur-md bg-white/5 border-b border-white/10">
+      {/* Navbar */}
+      <header className="sticky top-0 z-20 bg-white/5 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 rounded-md bg-gradient-to-br from-[#6c5ce7] to-[#00d2ff]" />
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                <span className="bg-gradient-to-r from-white via-white to-gray-300 bg-clip-text text-transparent">Cyber Security Portal</span>
-              </h1>
+          <nav className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-3">
+              {/* Logo */}
+              <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-[#6c5ce7] to-[#00d2ff] shadow-glass overflow-hidden">
+                <div className="absolute inset-0 opacity-30 bg-gradient-to-r from-white/40 via-transparent to-white/40 animate-shimmer bg-[length:200%_100%]" />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-sm uppercase tracking-widest text-white/60">Team OverFit</span>
+                <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-white via-white to-gray-300 bg-clip-text text-transparent">Cyber Security Portal</span>
+              </div>
             </div>
+
+            <div className="hidden md:flex items-center gap-6 text-white/80">
+              <button onClick={() => navigate('/dashboard')} className="hover:text-white transition">Home</button>
+              <button onClick={() => navigate('/cyber-incident')} className="hover:text-white transition">Incidents</button>
+              <button onClick={() => navigate('/safety-web')} className="hover:text-white transition">Safety Web</button>
+              <button onClick={() => navigate('/cert-dashboard')} className="hover:text-white transition">CERT</button>
+            </div>
+
             <button
               onClick={handleLogout}
-              className="group inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/90 transition hover:border-white/20 hover:bg-white/10"
+              className="group inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/90 transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10"
             >
               <span className="h-2 w-2 rounded-full bg-rose-400 group-hover:bg-rose-300" /> Logout
             </button>
-          </div>
+          </nav>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 animate-fadeInUp">
           <h2 className="text-4xl md:text-5xl font-extrabold mb-4">
             <span className="bg-gradient-to-r from-white via-white to-gray-300 bg-clip-text text-transparent">See Beyond the Surface</span>
           </h2>
@@ -83,12 +95,12 @@ const MainDashboard = () => {
           {portalCards.map((portal) => (
             <div
               key={portal.id}
-              className={`group relative cursor-pointer rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/10`}
+              className={`group relative cursor-pointer rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-glass transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/10`}
               onClick={() => navigate(portal.route)}
             >
               <div className="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ background: 'radial-gradient(800px circle at 0% 0%, rgba(108,92,231,0.12), transparent 40%), radial-gradient(800px circle at 100% 100%, rgba(0,210,255,0.12), transparent 40%)' }} />
               <div className="relative p-8 text-white">
-                <div className="text-6xl mb-6 text-center drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">{portal.icon}</div>
+                <div className="text-6xl mb-6 text-center drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] animate-floaty">{portal.icon}</div>
                 <h3 className="text-2xl font-bold mb-3 text-center tracking-tight">{portal.title}</h3>
                 <p className="text-white/80 text-center leading-relaxed">
                   {portal.description}
@@ -104,22 +116,24 @@ const MainDashboard = () => {
           ))}
         </div>
 
-        {/* Additional Info */}
-        <div className="mt-16 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+        {/* How It Works - glassmorphism */}
+        <div className="mt-16 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-glass relative overflow-hidden">
+          <div className="pointer-events-none absolute -top-24 -left-24 h-56 w-56 rounded-full bg-[#6c5ce7]/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -right-24 h-56 w-56 rounded-full bg-[#00d2ff]/20 blur-3xl" />
           <h3 className="text-2xl font-bold text-white mb-6 text-center">How It Works</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-4xl mb-3">📝</div>
+            <div className="text-center rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md hover:bg-white/10 transition animate-fadeInUp" style={{ animationDelay: '0ms' }}>
+              <div className="text-4xl mb-3 animate-floaty">📝</div>
               <h4 className="text-lg font-semibold text-white mb-2">Report & Upload</h4>
               <p className="text-white/70">Provide detailed information and upload evidence files for analysis.</p>
             </div>
-            <div className="text-center">
-              <div className="text-4xl mb-3">🤖</div>
+            <div className="text-center rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md hover:bg-white/10 transition animate-fadeInUp" style={{ animationDelay: '120ms' }}>
+              <div className="text-4xl mb-3 animate-floaty">🤖</div>
               <h4 className="text-lg font-semibold text-white mb-2">AI Analysis</h4>
               <p className="text-white/70">Our AI classifies threats and assigns priority scores automatically.</p>
             </div>
-            <div className="text-center">
-              <div className="text-4xl mb-3">⚡</div>
+            <div className="text-center rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md hover:bg-white/10 transition animate-fadeInUp" style={{ animationDelay: '240ms' }}>
+              <div className="text-4xl mb-3 animate-floaty">⚡</div>
               <h4 className="text-lg font-semibold text-white mb-2">Instant Response</h4>
               <p className="text-white/70">Get immediate feedback and next steps for your security concerns.</p>
             </div>
